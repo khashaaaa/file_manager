@@ -4,10 +4,12 @@ import { Modal } from './modal';
 export const FileList = ({ files, isLoading, onDelete, onRename }) => {
   const [editingId, setEditingId] = useState(null);
   const [newFileName, setNewFileName] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     fileId: null,
-    fileName: ''
+    fileName: '',
+    isMultiple: false
   });
 
   const startEditing = (file) => {
@@ -31,7 +33,17 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
     setDeleteModal({
       isOpen: true,
       fileId,
-      fileName
+      fileName,
+      isMultiple: false
+    });
+  };
+
+  const openMultiDeleteModal = () => {
+    setDeleteModal({
+      isOpen: true,
+      fileId: null,
+      fileName: `${selectedFiles.length} файл`,
+      isMultiple: true
     });
   };
 
@@ -39,13 +51,39 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
     setDeleteModal({
       isOpen: false,
       fileId: null,
-      fileName: ''
+      fileName: '',
+      isMultiple: false
     });
   };
 
   const confirmDelete = () => {
-    onDelete(deleteModal.fileId);
+    if (deleteModal.isMultiple) {
+      selectedFiles.forEach(fileId => {
+        onDelete(fileId);
+      });
+      setSelectedFiles([]);
+    } else {
+      onDelete(deleteModal.fileId);
+    }
     closeDeleteModal();
+  };
+
+  const toggleFileSelection = (fileId) => {
+    setSelectedFiles(prevSelected => {
+      if (prevSelected.includes(fileId)) {
+        return prevSelected.filter(id => id !== fileId);
+      } else {
+        return [...prevSelected, fileId];
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedFiles.length === files.length) {
+      setSelectedFiles([]);
+    } else {
+      setSelectedFiles(files.map(file => file.id));
+    }
   };
 
   const getFileIcon = (category) => {
@@ -107,7 +145,20 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
   return (
     <>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Файлууд</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Файлууд</h2>
+          {selectedFiles.length > 0 && (
+            <button
+              onClick={openMultiDeleteModal}
+              className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md text-sm flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              Сонгосон файлуудыг устгах ({selectedFiles.length})
+            </button>
+          )}
+        </div>
         
         {files.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -118,6 +169,16 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th scope="col" className="px-4 py-3">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-blue-600 rounded"
+                        checked={selectedFiles.length === files.length && files.length > 0}
+                        onChange={toggleSelectAll}
+                      />
+                    </div>
+                  </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Нэр</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Файлын өргөтгөл</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Хэмжээ</th>
@@ -127,7 +188,17 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {files.map(file => (
-                  <tr key={file.id}>
+                  <tr key={file.id} className={selectedFiles.includes(file.id) ? "bg-blue-50" : ""}>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 text-blue-600 rounded"
+                          checked={selectedFiles.includes(file.id)}
+                          onChange={() => toggleFileSelection(file.id)}
+                        />
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {getFileIcon(file.category)}
@@ -203,6 +274,7 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         fileName={deleteModal.fileName}
+        isMultiple={deleteModal.isMultiple}
       />
     </>
   );

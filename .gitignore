@@ -1,6 +1,36 @@
+# Dependencies
 /vendor
-/uploads
 composer.lock
-workerman.log
-workerman.main.php.pid
+
+# Uploaded files
+/uploads
+/uploads/*
+/uploads/documents/*
+/uploads/images/*
+/uploads/videos/*
+
+# Environment files
 .env
+.env.*
+!.env.example
+
+# Workerman logs and process files
+*.log
+workerman.log
+*.pid
+workerman.*.pid
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

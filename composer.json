@@ -1,12 +1,22 @@
 {
     "name": "root/file_manager",
     "description": "Manager for communities",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
     "authors": [
         {
-            "name": "khashaa"
+            "name": "khashaa",
+            "email": "forwardent01@gmail.com"
         }
     ],
     "require": {
-        "workerman/workerman": "^5.1"
-    }
+        "workerman/workerman": "^5.1",
+        "ext-pgsql": "*",
+        "ext-posix": "*"
+    },
+    "minimum-stability": "stable"
 }

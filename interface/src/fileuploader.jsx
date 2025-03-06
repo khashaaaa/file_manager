@@ -31,14 +31,10 @@ export const FileUploader = ({ apiUrl, onUploadComplete }) => {
     setUploading(true);
     const formData = new FormData();
     
-    if (files.length === 1) {
-      formData.append('file', files[0]);
-    } else {
-      files.forEach((file, index) => {
-        formData.append(`file[${index}]`, file);
-      });
-    }
-    
+    files.forEach((file, index) => {
+      formData.append(`file[${index}]`, file);
+    });
+  
     setUploadProgress(0);
     
     try {
@@ -53,38 +49,31 @@ export const FileUploader = ({ apiUrl, onUploadComplete }) => {
           setUploadProgress(percentCompleted);
         }
       });
-      
+  
       setUploadProgress(100);
-      
-      if (response.data && response.data.results) {
+  
+      if (response.data?.results) {
         setUploadResults(response.data.results);
-      } else if (response.data && response.data.message) {
-        const defaultResults = files.map(file => ({
-          name: file.name,
-          status: 'success'
-        }));
-        setUploadResults(defaultResults);
+      } else {
+        setUploadResults(files.map(file => ({ name: file.name, status: 'success' })));
       }
-      
+  
       onUploadComplete();
+      setTimeout(resetUploader, 2000);
     } catch (error) {
       console.error('Алдааны мэдээлэл:', error);
-      
-      if (error.response) {
-        console.error('Error status:', error.response.status);
-        console.error('Error data:', error.response.data);
-      }
-      
+  
       const errorResults = files.map(file => ({
         name: file.name,
         error: error.response?.data?.error || 'Failed to upload files'
       }));
-      
+  
       setUploadResults(errorResults);
     } finally {
       setUploading(false);
     }
   };
+  
 
   const totalSize = files.reduce((total, file) => total + file.size, 0);
   const formattedTotalSize = (totalSize / (1024 * 1024)).toFixed(2);
