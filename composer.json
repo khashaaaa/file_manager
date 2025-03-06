@@ -1,0 +1,12 @@
+{
+    "name": "root/file_manager",
+    "description": "Manager for communities",
+    "authors": [
+        {
+            "name": "khashaa"
+        }
+    ],
+    "require": {
+        "workerman/workerman": "^5.1"
+    }
+}

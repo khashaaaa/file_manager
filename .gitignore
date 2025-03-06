@@ -1,0 +1,6 @@
+/vendor
+/uploads
+composer.lock
+workerman.log
+workerman.main.php.pid
+.env
