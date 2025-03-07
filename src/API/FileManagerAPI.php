@@ -89,6 +89,7 @@ class FileManagerAPI {
             $path = parse_url($request->path(), PHP_URL_PATH);
             
             $response = match(true) {
+                $method === 'GET' && preg_match('/^\/files\/(\d+)\/download$/', $path, $matches) => $this->downloadFile((int)$matches[1]),
                 $method === 'GET' && preg_match('/^\/files\/(\d+)$/', $path, $matches) => $this->getFile((int)$matches[1]),
                 $method === 'GET' && $path === '/files' => $this->listFiles(),
                 $method === 'POST' && $path === '/files' => $this->handleFileUpload($request),
@@ -129,6 +130,37 @@ class FileManagerAPI {
         ]);
         
         return new Response($status, $headers, json_encode($data));
+    }
+
+    private function downloadFile(int $id): Response {
+        $result = $this->db->query("SELECT * FROM files WHERE id = $1", [$id]);
+        
+        if ($row = pg_fetch_assoc($result)) {
+            $filePath = $row['file_path'];
+            $fileName = $row['original_name'];
+            $mimeType = $row['mime_type'];
+            
+            if (!file_exists($filePath)) {
+                return $this->createResponse(['error' => 'File not found on disk'], 404);
+            }
+            
+            $fileContent = file_get_contents($filePath);
+            if ($fileContent === false) {
+                return $this->createResponse(['error' => 'Failed to read file from disk'], 500);
+            }
+            
+            $response = new Response(200, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Content-Length' => filesize($filePath),
+                'Access-Control-Allow-Origin' => '*',
+                'Cache-Control' => 'no-cache'
+            ], $fileContent);
+            
+            return $response;
+        }
+        
+        return $this->createResponse(['error' => 'File not found in database'], 404);
     }
     
     private function listFiles(): Response {

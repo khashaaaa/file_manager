@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal } from './modal';
 
-export const FileList = ({ files, isLoading, onDelete, onRename }) => {
+export const FileList = ({ files, isLoading, onDelete, onRename, apiUrl = 'http://localhost:8080' }) => {
   const [editingId, setEditingId] = useState(null);
   const [newFileName, setNewFileName] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -58,11 +58,11 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
 
   const confirmDelete = () => {
     if (deleteModal.isMultiple) {
-      selectedFiles.forEach(fileId => {
-        onDelete(fileId);
-      });
+      // Delete multiple files at once
+      onDelete(selectedFiles);
       setSelectedFiles([]);
     } else {
+      // Delete single file
       onDelete(deleteModal.fileId);
     }
     closeDeleteModal();
@@ -86,31 +86,43 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
     }
   };
 
-  const getFileIcon = (category) => {
+  const getFileIcon = (file) => {
+    const category = file.category;
+    const fileId = file.id;
+    const downloadUrl = `${apiUrl}/files/${fileId}/download`;
+
     switch (category) {
       case 'image':
         return (
-          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
+          <a href={downloadUrl} download title="Татаж авах">
+            <svg className="w-6 h-6 text-blue-500 hover:text-blue-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </a>
         );
       case 'video':
         return (
-          <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-          </svg>
+          <a href={downloadUrl} download title="Татаж авах">
+            <svg className="w-6 h-6 text-red-500 hover:text-red-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+          </a>
         );
       case 'document':
         return (
-          <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
+          <a href={downloadUrl} download title="Татаж авах">
+            <svg className="w-6 h-6 text-green-500 hover:text-green-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </a>
         );
       default:
         return (
-          <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-          </svg>
+          <a href={downloadUrl} download title="Татаж авах">
+            <svg className="w-6 h-6 text-gray-500 hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+          </a>
         );
     }
   };
@@ -201,7 +213,7 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {getFileIcon(file.category)}
+                        {getFileIcon(file)}
                         <div className="ml-2 w-44">
                           {editingId === file.id ? (
                             <input
@@ -246,6 +258,16 @@ export const FileList = ({ files, isLoading, onDelete, onRename }) => {
                         </div>
                       ) : (
                         <div className="flex space-x-2">
+                          <a
+                            href={`${apiUrl}/files/${file.id}/download`}
+                            download
+                            className="cursor-pointer bg-blue-500 rounded py-1 px-2 text-sm text-white inline-flex items-center"
+                          >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Татах
+                          </a>
                           <button
                             onClick={() => startEditing(file)}
                             className="cursor-pointer bg-amber-500 rounded py-1 px-2 text-sm text-white"
